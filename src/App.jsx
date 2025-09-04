@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Chat } from "./components/Chat/Chat";
 import styles from "./App.module.css";
 import { Assistant } from "./components/Assistant/Assistant";
@@ -7,24 +7,26 @@ import { Sidebar } from "./components/Sidebar/Sidebar";
 
 const CHATS = [
   {
-    id: 1,
-    title: "How to use AI Tools API in React Application",
-  },
-  {
     id: 2,
     title: "Gemini AI vs ChatGPT",
-  },
-  {
-    id: 3,
-    title: "Comparising Models for Popular AI Tools",
+    messages: [
+      { role: "user", content: "What is better ChatGPT or Gemini?" },
+      {
+        role: "assistant",
+        content: "Hi! Can you explain for what type of tasks you will use it?",
+      },
+    ],
   },
   {
     id: 4,
     title: "How to use AI tools in your daily life",
-  },
-  {
-    id: 5,
-    title: "How to use AI tools in your daily work",
+    messages: [
+      { role: "user", content: "Hey! How to use AI in my life?" },
+      {
+        role: "assistant",
+        content: "Hi! Would you like to use it for work or for hobbies?",
+      },
+    ],
   },
 ];
 
@@ -86,9 +88,25 @@ function App() {
   const [assistant, setAssistant] = useState();
   const [chats, setChats] = useState(CHATS);
   const [activeChatId, setActiveChatId] = useState(2);
+  const activeChatMessages = useMemo(
+    () => chats.find(({ id }) => id === activeChatId)?.messages ?? [],
+    [chats, activeChatId]
+  );
 
   function handleAssistantChange(newAssistant) {
     setAssistant(newAssistant);
+  }
+
+  function updateChats(messages = []) {
+    setChats((prevChats) =>
+      prevChats.map((chat) =>
+        chat.id === activeChatId ? { ...chat, messages } : chat
+      )
+    );
+  }
+
+  function handleChatMessagesUpdate(messages) {
+    updateChats(messages);
   }
 
 
@@ -106,7 +124,12 @@ function App() {
         />
 
         <main className={styles.Main}>
-          <Chat assistant={assistant} />
+          <Chat
+            assistant={assistant}
+            chatId={activeChatId}
+            chatMessages={activeChatMessages}
+            onChatMessagesUpdate={handleChatMessagesUpdate}
+          />
           <div className={styles.Configuration}>
             <Assistant onAssistantChange={handleAssistantChange} />
             <Theme />

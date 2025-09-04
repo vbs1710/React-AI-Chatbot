@@ -1,13 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader } from "../Loader/Loader";
 import { Messages } from "../Messages/Messages";
 import { Controls } from "../Controls/Controls";
 import styles from "./Chat.module.css";
 
-export function Chat({ assistant }) {
+export function Chat({
+  assistant,
+  chatId,
+  chatMessages,
+  onChatMessagesUpdate,
+}) {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+
+  useEffect(() => {
+    setMessages(chatMessages);
+  }, [chatId]);
+
+  useEffect(() => {
+    onChatMessagesUpdate(messages);
+  }, [messages]);
 
   function updateLastMessageContent(content) {
     setMessages((prevMessages) =>
@@ -22,7 +35,7 @@ export function Chat({ assistant }) {
   function addMessage(message) {
     setMessages((prevMessages) => [...prevMessages, message]);
   }
-  
+
   async function handleContentSend(content) {
     addMessage({ content, role: "user" });
     setIsLoading(true);
@@ -30,7 +43,10 @@ export function Chat({ assistant }) {
       // const result = await chat.sendMessage(content); // uncomment when used gemini and comment below
       // const result = await assistant.chat(content, messages);
       // const result = assistant.chatStream(content,messages.filter(({ role }) => role !== "system"));
-      const result = await assistant.chatStream(content,messages.filter(({ role }) => role !== "system"));
+      const result = await assistant.chatStream(
+        content,
+        messages.filter(({ role }) => role !== "system")
+      );
       let isFirstChunk = false;
 
       for await (const chunk of result) {
