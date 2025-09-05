@@ -7,6 +7,16 @@
   overflow-y: auto;
 }
 
+.Markdown pre {
+  white-space: pre-wrap;
+}
+
+.Markdown pre:has(code) {
+  padding: 8px;
+  border-radius: 8px;
+  background: light-dark(#f9f9f9, #171717);
+}
+
 .Group {
   display: flex;
   flex-direction: column;

@@ -9,6 +9,7 @@ export function Chat({
   chatId,
   chatMessages,
   onChatMessagesUpdate,
+  isActive = false,
 }) {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -16,10 +17,14 @@ export function Chat({
 
   useEffect(() => {
     setMessages(chatMessages);
+
+    if (assistant?.name === "googleai") {
+      assistant.createChat(chatMessages);
+    }
   }, [chatId]);
 
   useEffect(() => {
-    onChatMessagesUpdate(messages);
+    onChatMessagesUpdate(chatId, messages);
   }, [messages]);
 
   function updateLastMessageContent(content) {
@@ -40,9 +45,6 @@ export function Chat({
     addMessage({ content, role: "user" });
     setIsLoading(true);
     try {
-      // const result = await chat.sendMessage(content); // uncomment when used gemini and comment below
-      // const result = await assistant.chat(content, messages);
-      // const result = assistant.chatStream(content,messages.filter(({ role }) => role !== "system"));
       const result = await assistant.chatStream(
         content,
         messages.filter(({ role }) => role !== "system")
@@ -73,11 +75,8 @@ export function Chat({
       setIsStreaming(false);
     }
   }
-  // const [finalMessage,setFinalMessage]=useState([WELCOME_MESSAGE_GROUP, ...messagesGroups])
 
-  // useEffect(() => {
-  //   setFinalMessage([WELCOME_MESSAGE_GROUP, ...messagesGroups])
-  // },messagesGroups)
+  if (!isActive) return null;
 
   return (
     <>
@@ -94,3 +93,12 @@ export function Chat({
     </>
   );
 }
+
+// const [finalMessage,setFinalMessage]=useState([WELCOME_MESSAGE_GROUP, ...messagesGroups])
+
+// useEffect(() => {
+//   setFinalMessage([WELCOME_MESSAGE_GROUP, ...messagesGroups])
+// },messagesGroups)
+// const result = await chat.sendMessage(content); // uncomment when used gemini and comment below
+// const result = await assistant.chat(content, messages);
+// const result = assistant.chatStream(content,messages.filter(({ role }) => role !== "system"));
